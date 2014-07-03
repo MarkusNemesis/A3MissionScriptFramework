@@ -9,10 +9,10 @@ Return:
 
 if (isServer) then 
 { 
-    if (!isDedicated) then {execVM "client\clientInit.sqf";}; // 'server' is a client hosting the mission. Run both main loops. 
-    execVM "server\serverInit.sqf";
+    if (!isDedicated) then {call compile preprocessFileLineNumbers  "client\clientInit.sqf";}; // 'server' is a client hosting the mission. Run both main loops. 
+    call compile preprocessFileLineNumbers "server\serverInit.sqf";
 };
 
 if (!isServer) then {
-    execVM "client\clientInit.sqf"; // system is a client, run only the client loop.
+    call compile preprocessFileLineNumbers  "client\clientInit.sqf"; // system is a client, run only the client loop.
 };

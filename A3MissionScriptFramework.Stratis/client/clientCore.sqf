@@ -13,20 +13,27 @@ private ["_pFrame", "_runPrior"];
 
 //
 _runPrior = 1;
-_pFrame = diag_frameno;
 
 diag_log "MV: STARTING CLIENT MAINLOOP";
-while {true} do // This is the main loop. EVERYTHING clientside happens here.
+waitUntil // This is the main loop. EVERYTHING clientside happens here.
 {
     // -------- Run Priority 1 - Runs every frame --------
-    {
-        private ['_fname', '_args', '_priority'];
-        _fname = _x select 0;
-        _args = _x select 1;
-        _priority = _x select 2;
-        call compile format ["_args call %1", _fname]; //_args call _fName;
-        diag_log format ["Running event from array: %1 , %2", _fname, _args];
-        [_forEachIndex] call MV_Client_fnc_RemoveEvent;
+	{
+		if (!isnil '_x') then { // -- Somehow, this can happen....
+			private ['_fname', '_args', '_eTime'];
+			_fname = _x select 0;
+			_args = _x select 1;
+			_eTime = _x select 2;
+			if (!isnil '_fname') then {
+				if (_eTime < time) then { // -- Call only when it's ready to be.
+					diag_log format ["MV: CLIENT: Running event from array: %1 , %2. Frame: %3, EventCount: %4", _fname, _args, diag_frameno, count Client_EventArray];
+					[_forEachIndex] call MV_Client_fnc_RemoveEvent; // -- Removes before running, as, if it causes an error, the mainloop will reboot, and thankfully not catch the same bugged event and crash infinitely.
+					call compile format ["_args call %1", _fname]; // Runs the event
+				}; 
+			} else { // -- Event is a null event, and thus removed.
+				[_forEachIndex] call MV_Client_fnc_RemoveEvent;
+			}; 
+		};
     } foreach Client_EventArray;
     
     // Check if the player is spawned
@@ -57,6 +64,5 @@ while {true} do // This is the main loop. EVERYTHING clientside happens here.
     // Leave this last.
     _runPrior = _runPrior + 1;
     if (_runPrior > PRIOR_RANGE) then {_runPrior = 1;};
-    _pFrame = diag_frameno;
-    waituntil {diag_frameno > _pFrame; sleep 0.01;}; // Main loop runs once per tick.Let the scheduler recycle
+    false // Main loop runs once per tick. Let the scheduler recycle
 };
