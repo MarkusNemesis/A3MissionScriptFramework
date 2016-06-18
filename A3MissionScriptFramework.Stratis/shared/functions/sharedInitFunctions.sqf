@@ -9,3 +9,4 @@ MV_Shared_fnc_initParams = Compilefinal preprocessFileLineNumbers "shared\functi
 MV_Shared_fnc_GetPlayers = Compilefinal preprocessFileLineNumbers "shared\functions\sharedGetPlayers.sqf";
 MV_Shared_fnc_SetSuperAI = Compilefinal preprocessFileLineNumbers "shared\functions\sharedSetSuperAI.sqf";
 MV_Shared_fnc_GetServerTimeInt = Compilefinal preprocessFileLineNumbers "shared\functions\sharedGetServerTimeInt.sqf";
+MV_Shared_fnc_SendPublicMessage = Compilefinal preprocessFileLineNumbers "shared\functions\sharedSendPublicMessage.sqf";

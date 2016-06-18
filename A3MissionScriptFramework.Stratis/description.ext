@@ -12,5 +12,8 @@ onLoadMissionTime = false;
 enableItemsDropping = 0;
 //loadScreen = "Rsc\loadscreen.paa";
 
+// Debugging
+enableDebugConsole = 2;
+
 // Parameters
 #include "Rsc\parameters.hpp"

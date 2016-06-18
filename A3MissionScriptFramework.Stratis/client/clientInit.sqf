@@ -13,6 +13,13 @@ startLoadingScreen ["Receiving"];
 waitUntil {!isNull player}; // Make sure the player exists before starting.
 diag_log "MV: CLIENT INIT: STARTED";
 
+// -- Create map location for clientside only variable storage. Variable name is created by random number generator. 
+private ['_slocN', '_sLoc'];
+_slocN = format ['%1%2', (profileName), (round (random 10000))];
+call compile format ["%1 = createLocation ['NameVillage', [0, 0, 0], 1, 1];", _slocN];
+uiNamespace setVariable ["Client_LocObj", _slocN];
+diag_log format ["MV: clientInit: Location Var name generated: %1", _slocN];
+
 // Init client functions
 call compile preprocessFileLineNumbers "Client\functions\clientInitFunctions.sqf";
 
@@ -22,14 +29,18 @@ call compile preprocessFileLineNumbers "Shared\sharedInit.sqf";
 // Client constants
 Client_PlayerName = str name player;
 Client_PlayerSide = side player;
+Client_PlayerSideStr = str Client_PlayerSide;
+Client_PlayerSlotStr = str player;
 //
 // Init client globals
-Client_PlayerGarbageCollection = []; // This variable is filled with objects to be cleaned up / managed after a set time. [obj, cleandelay] todo remove
-Client_PlayerDeathObjectCollection = []; // This variable is filled with objects that are handled immediatly upon the death of the player. todo remove
+Client_SpawnType = "first";
 Client_PlayerSpawned = false;
-Client_HitArray = []; // Stores all the 'hits' the player receives and is collated on player death and sent to the server the top 3 damage sources by %. todo remove
+Client_HitArray = []; // Stores all the 'hits' the player receives and is collated on player death and sent to the server the top 3 damage sources by %.
 Client_EventArray = []; // Client_EventArray elements contain: ["function_name", [args], priority] 
 
+// Declare client's commVar
+call compile format ["%1_CommVar = '';", Client_PlayerSlotStr];
+format ["%1_CommVar", Client_PlayerSlotStr] addPublicVariableEventHandler {[_this select 1] call MV_Client_fnc_CommVarEH};
 // SERVER FETCHED VARIABLES ->
 // All network fetched variables are initialized here. This should be done as late as possible.
 //waitUntil{!isnil 'MV_Netvar_VARNAME'};
