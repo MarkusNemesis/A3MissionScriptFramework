@@ -9,60 +9,62 @@ This helps distribute functions across a spectrum of how often a function is ran
 This can off-set non time-critical functions, and leave more room for other more important events.
 */
 
-private ["_pFrame", "_runPrior"];
+private [];
 
 //
-_runPrior = 1;
 
-diag_log "MV: STARTING CLIENT MAINLOOP";
-waitUntil // This is the main loop. EVERYTHING clientside happens here.
+// -------- Run Priority 1 - Runs every frame --------
 {
-    // -------- Run Priority 1 - Runs every frame --------
-	{
-		if (!isnil '_x') then { // -- Somehow, this can happen....
-			private ['_fname', '_args', '_eTime'];
-			_fname = _x select 0;
-			_args = _x select 1;
-			_eTime = _x select 2;
-			if (!isnil '_fname') then {
-				if (_eTime < time) then { // -- Call only when it's ready to be.
-					diag_log format ["MV: CLIENT: Running event from array: %1 , %2. Frame: %3, EventCount: %4", _fname, _args, diag_frameno, count Client_EventArray];
-					[_forEachIndex] call MV_Client_fnc_RemoveEvent; // -- Removes before running, as, if it causes an error, the mainloop will reboot, and thankfully not catch the same bugged event and crash infinitely.
-					call compile format ["_args call %1", _fname]; // Runs the event
-				}; 
-			} else { // -- Event is a null event, and thus removed.
-				[_forEachIndex] call MV_Client_fnc_RemoveEvent;
+	if (!isnil '_x') then { // -- Somehow, this can happen....
+		private ['_fname', '_args', '_eTime'];
+		_fname = _x select 0;
+		_args = _x select 1;
+		_eTime = _x select 2;
+		if (!isnil '_fname') then {
+			if (_eTime < time) then { // -- Call only when it's ready to be.
+				diag_log format ["MV: CLIENT: Running event from array: %1 , %2. Frame: %3, EventCount: %4", _fname, _args, diag_frameno, count Client_EventArray];
+				[_forEachIndex] call MV_Client_fnc_RemoveEvent; // -- Removes before running, as, if it causes an error, the mainloop will reboot, and thankfully not catch the same bugged event and crash infinitely.
+				call compile format ["_args call %1", _fname]; // Runs the event
 			}; 
-		};
-    } foreach Client_EventArray;
-    
-    // Check if the player is spawned
-    if (Client_PlayerSpawned) then
-    {
-		
-    };
-    
-    // -------- Run Priority 2 - Runs every 2 frames --------
-    if (_runPrior % 2 == 0) then
-    {
-        
-    };
-    
-    // -------- Run Priority 4 - Runs every 4 frames --------
-    if (_runPrior % 4 == 0) then
-    {
-        // Run the garbage collector
-        call MV_Client_fnc_RunGarbageCollector;
-    };
-    
-    // -------- Run Priority 8 - Runs every 8 frames --------
-    if (_runPrior % 8 == 0) then
-    {
-		
-    };
-    
-    // Leave this last.
-    _runPrior = _runPrior + 1;
-    if (_runPrior > PRIOR_RANGE) then {_runPrior = 1;};
-    false // Main loop runs once per tick. Let the scheduler recycle
+		} else { // -- Event is a null event, and thus removed.
+			[_forEachIndex] call MV_Client_fnc_RemoveEvent;
+		}; 
+	};
+} foreach Client_EventArray;
+
+// Check if the player is spawned
+if (Client_PlayerSpawned) then
+{
+	
+};
+if (PreviousFrame < (diag_frameno - 2)) then
+{
+	diag_log "Error! Frame skip!";
+};
+PreviousFrame = diag_frameno;
+
+// -------- Run Priority 2 - Runs every 2 frames --------
+if (diag_frameno % 2 == 0) then
+{
+	
+};
+
+// -------- Run Priority 4 - Runs every 4 frames --------
+if (diag_frameno % 4 == 0) then
+{
+	// Run the garbage collector
+	call MV_Client_fnc_RunGarbageCollector;
+};
+
+// -------- Run Priority 8 - Runs every 8 frames --------
+if (diag_frameno % 8 == 0) then
+{
+	
+};
+
+// -------- Run Priority Second - Runs every second --------
+if ((call MV_Shared_fnc_GetServerTimeInt) > clientLastSecond) then
+{
+	clientLastSecond = call MV_Shared_fnc_GetServerTimeInt;
+	diag_log format["Client Test %1", clientLastSecond];
 };

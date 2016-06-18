@@ -5,7 +5,7 @@ Skype: markus.davey
 Desc: Initialises all the systems required for the client. Functions, variables, etc.
 */
 
-private ["_runTime"];
+private ["_runTime","_clientCore"];
 _runTime =+ time;
 // Enter into a loading screen. This forces all processing power towards scripts.
 startLoadingScreen ["Receiving"];
@@ -44,7 +44,7 @@ call MV_Shared_fnc_initParams;
 call MV_Client_fnc_InitEventHandlers;
 
 // **** CODE AFTER THIS POINT IS RAN DURING MISSION TIME ****
-endLoadingScreen // End loading screen
+endLoadingScreen; // End loading screen
 waituntil {time > 0}; // Checks if the mission has actually started.
 finishMissionInit;
 
@@ -58,8 +58,12 @@ call MV_Shared_fnc_GetPlayers; // Gets the player names.
 // YOU MUST Leave this last. This calls the clientCore mainloop.
 _runTime = time - _runTime;
 diag_log format ["MV: CLIENT INIT: FINISHED, Time taken: %1", _runTime];
-while {true} do // Auto main thread recovery
-{
-	call compile preprocessFileLineNumbers "Client\clientCore.sqf";
-	diag_log format ["MV: ERROR: Client Mainloop Crashed! Frame No: %1", diag_frameno];
-};
+
+
+diag_log "MV: STARTING CLIENT MAINLOOP";
+_clientCore = compile preprocessFileLineNumbers "Client\clientCore.sqf";
+
+clientLastSecond = call MV_Shared_fnc_GetServerTimeInt;
+["clientCoreID", "onEachFrame", {
+	call _this;
+},_clientCore] call BIS_fnc_addStackedEventHandler;
