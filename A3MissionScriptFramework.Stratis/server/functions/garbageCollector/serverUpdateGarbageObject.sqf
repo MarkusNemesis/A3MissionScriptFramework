@@ -17,13 +17,15 @@ if (_uObj iskindof "Man") exitwith {}; // -- We don't update creatures/people as
 //diag_log format ["GCUpdate unit: %1", _x];
 if (damage _uObj >= 1) then 
 {
-    _delay = _delay + 60*2; // Object is dead.
+    _delay = _delay + 60*MV_Params_GCDelayVehicles; // Object is dead.
 }
 else
 {
     _delay = _delay + 60*30; // Object isn't dead.
 };
 
+
+// Leave last
 {
     if (_uObj == _x select 0) exitwith {_x set [1, _delay]; diag_log format ["MV: GarbageUpdate: %1 updated", _uObj]; }; // Sets the delay for this object to whatever was decided above.
 } foreach Server_GarbageCollection;

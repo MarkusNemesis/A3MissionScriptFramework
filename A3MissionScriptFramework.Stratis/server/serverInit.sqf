@@ -32,6 +32,12 @@ call MV_Shared_fnc_initParams;
 Server_PlayerRegistry = []; // Format: [id, playerName, UID, playerSlot];
 Server_EventArray = []; // Server_EventArray elements contain: ["function_name", [args], priority]
 
+// -- Init public variables
+MV_Netvar_WESTVEHICLES = [];
+publicVariable "MV_Netvar_WESTVEHICLES";
+MV_Netvar_EASTVEHICLES = [];
+publicVariable "MV_Netvar_EASTVEHICLES";
+
 // OnPlayerConnected
 OnPlayerConnected "[_id, _name, _uid] execVM ""Server\functions\serverOnPlayerConnected.sqf"";";
 
@@ -52,7 +58,10 @@ Shared_SpawnHaven = _object;
 
 // Init playerslots
 call MV_Shared_fnc_GetPlayers;
-call Compile preprocessFile "Server\functions\init\ServerInitPlayerSlots.sqf";
+call MV_Server_fnc_initPlayerSlots;
+
+// -- Spawn HQs and starting vehicles at spawn points.
+call MV_Server_fnc_SpawnStartingVehicles;
 
 // YOU MUST Leave this last. This calls the serverCore mainloop.
 _runTime = time - _runTime;

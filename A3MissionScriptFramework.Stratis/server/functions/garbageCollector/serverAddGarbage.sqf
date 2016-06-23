@@ -2,10 +2,9 @@
 Created: 04/03/2013
 Author: Markus Davey
 Skype: markus.davey
-Desc: Adds objects to the garbage collection array for this client. These objects are cleared after the delay time has elapsed.
+Desc: Adds objects to the garbage collection array. These objects are cleared after the delay time has elapsed.
 Return:
 */
-
 private ['_garbage', '_delay'];
 
 _garbage = _this;
